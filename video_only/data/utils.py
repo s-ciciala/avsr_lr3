@@ -10,6 +10,7 @@ from torch.nn.utils.rnn import pad_sequence
 import numpy as np
 import cv2 as cv
 from scipy.special import softmax
+from sys import exit
 
 
 
@@ -18,22 +19,23 @@ def prepare_main_input(visualFeaturesFile, targetFile, reqInpLen, charToIx, vide
     """
     Function to convert the data sample (visual features file, target file) in the main dataset into appropriate tensors.
     """
-
+#     print(targetFile)
     if targetFile is not None:
 
         #reading the target from the target file and converting each character to its corresponding index
         with open(targetFile, "r") as f:
             trgt = f.readline().strip()[7:]
-
+        ##UNDO THIS TO SEE TEXT 
+#         print(trgt)
         trgt = [charToIx[char] for char in trgt]
         trgt.append(charToIx["<EOS>"])
         trgt = np.array(trgt)
         trgtLen = len(trgt)
 
-        #the target length must be less than or equal to 100 characters (restricted space where our model will work)
-        if trgtLen > 100:
-            print("Target length more than 100 characters. Exiting")
-            exit()
+#         #the target length must be less than or equal to 100 characters (restricted space where our model will work)
+#         if trgtLen > 100:
+#             print("Target length more than 100 characters. Exiting")
+#             exit()
 
 
     #loading the visual features
@@ -73,7 +75,7 @@ def prepare_pretrain_input(visualFeaturesFile, targetFile, numWords, charToIx, v
     with open(targetFile, "r") as f:
         lines = f.readlines()
     lines = [line.strip() for line in lines]
-
+#     print(lines)
     trgt = lines[0][7:]
     words = trgt.split(" ")
 
