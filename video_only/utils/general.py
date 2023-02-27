@@ -1,16 +1,9 @@
-"""
-Author: Smeet Shah
-Copyright (c) 2020 Smeet Shah
-File part of 'deep_avsr' GitHub repository available at -
-https://github.com/lordmartian/deep_avsr
-"""
-
 import torch
 from tqdm import tqdm
 
 from .metrics import compute_cer, compute_wer
 from .decoders import ctc_greedy_decode, ctc_search_decode
-
+from sys import exit
 
 
 def num_params(model):
@@ -33,7 +26,7 @@ def train(model, trainLoader, optimizer, loss_function, device, trainParams):
     trainingLoss = 0
     trainingCER = 0
     trainingWER = 0
-
+    
     for batch, (inputBatch, targetBatch, inputLenBatch, targetLenBatch) in enumerate(tqdm(trainLoader, leave=False, desc="Train",
                                                                                           ncols=75)):
 

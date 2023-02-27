@@ -1,10 +1,3 @@
-"""
-Author: Smeet Shah
-Copyright (c) 2020 Smeet Shah
-File part of 'deep_avsr' GitHub repository available at -
-https://github.com/lordmartian/deep_avsr
-"""
-
 args = dict()
 
 
@@ -15,11 +8,12 @@ args["TRAIN_DIRECTORY"] = "../lrs3/train_mini/"
 args["TEST_DIRECTORY"] = "../lrs3/test_mini/"
 args["VAL_DIRECTORY"] = "../lrs3/val_mini/"
 args["TRAINVAL_DIRECTORY"] = "../lrs3/trainval_mini/"
-args["DEMO_DIRECTORY"] = "../../avsr_lr3/video_only/demo/"   #absolute path to the demo directory
 args["PRETRAINED_MODEL_FILE"] = "/final/models/pretrained_model.pt"     #relative path to the pretrained model file
 args["TRAINED_MODEL_FILE"] = "/final/models/trained_model.pt"   #relative path to the trained model file
-args["TRAINED_FRONTEND_FILE"] = "../../deep_avsr_models/visual_frontend/visual_frontend.pt" #absolute path to the trained language model file
+args["DEMO_DIRECTORY"] = "../../avsr_lr3/audio_only/demo/"   #absolute path to the demo directory
+
 args["TRAINED_LM_FILE"] = "../../deep_avsr_models/language_model/language_model.pt" #absolute path to the trained visual frontend file
+
 
 #data
 args["PRETRAIN_VAL_SPLIT"] = 0.01   #validation set size fraction during pretraining
@@ -37,10 +31,11 @@ args["INDEX_TO_CHAR"] = {1:" ", 22:"'", 30:"1", 29:"0", 37:"3", 32:"2", 34:"5", 
 
 
 #preprocessing
-args["VIDEO_FPS"] = 25  #frame rate of the video clips
-args["ROI_SIZE"] = 112  #height and width of input greyscale lip region patch
-args["NORMALIZATION_MEAN"] = 0.4161 #mean value for normalization of greyscale lip region patch
-args["NORMALIZATION_STD"] = 0.1688  #standard deviation value for normalization of greyscale lip region patch
+args["NOISE_PROBABILITY"] = 0.05    #noise addition probability while training
+args["NOISE_SNR_DB"] = 0    #noise level in dB SNR
+args["STFT_WINDOW"] = "hamming" #window to use while computing STFT
+args["STFT_WIN_LENGTH"] = 0.040 #window size in secs for computing STFT
+args["STFT_OVERLAP"] = 0.030    #consecutive window overlap in secs while computing STFT
 
 
 #training
@@ -55,13 +50,14 @@ args["SAVE_FREQUENCY"] = 10 #saving the model weights and loss/metric plots afte
 args["INIT_LR"] = 1e-4  #initial learning rate for scheduler
 args["FINAL_LR"] = 1e-6 #final learning rate for scheduler
 args["LR_SCHEDULER_FACTOR"] = 0.5   #learning rate decrease factor for scheduler
-args["LR_SCHEDULER_WAIT"] = 25  #number of steps to wait to lower learning rate
+args["LR_SCHEDULER_WAIT"] = 15  #number of steps to wait to lower learning rate
 args["LR_SCHEDULER_THRESH"] = 0.001 #threshold to check plateau-ing of wer
 args["MOMENTUM1"] = 0.9 #optimizer momentum 1 value
 args["MOMENTUM2"] = 0.999   #optimizer momentum 2 value
 
 
 #model
+args["AUDIO_FEATURE_SIZE"] = 321    #feature size of audio features
 args["NUM_CLASSES"] = 40    #number of output characters
 
 
@@ -84,6 +80,7 @@ args["USE_LM"] = False  #whether to use language model for decoding
 
 #testing
 args["TEST_DEMO_DECODING"] = "greedy"   #test/demo decoding type - "greedy" or "search"
+args["TEST_DEMO_NOISY"] = False #test/demo with noisy audio
 
 
 if __name__ == "__main__":

@@ -1,12 +1,5 @@
-"""
-Author: Smeet Shah
-Copyright (c) 2020 Smeet Shah
-File part of 'deep_avsr' GitHub repository available at -
-https://github.com/lordmartian/deep_avsr
-"""
-
-import torch
 from torch.utils.data import Dataset
+from scipy.io import wavfile
 import numpy as np
 
 from .utils import prepare_pretrain_input
@@ -20,7 +13,7 @@ class LRS2Pretrain(Dataset):
     A custom dataset class for the LRS2 pretrain (includes pretain, preval) dataset.
     """
 
-    def __init__(self, dataset, datadir, numWords, charToIx, stepSize, videoParams):
+    def __init__(self, dataset, datadir, numWords, charToIx, stepSize, audioParams, noiseParams):
         super(LRS2Pretrain, self).__init__()
         with open(datadir + "/" + dataset + ".txt", "r") as f:
             lines = f.readlines()
@@ -29,7 +22,10 @@ class LRS2Pretrain(Dataset):
         self.charToIx = charToIx
         self.dataset = dataset
         self.stepSize = stepSize
-        self.videoParams = videoParams
+        self.audioParams = audioParams
+        _, self.noise = wavfile.read(noiseParams["noiseFile"])
+        self.noiseProb = noiseParams["noiseProb"]
+        self.noiseSNR = noiseParams["noiseSNR"]
         return
 
 
@@ -43,10 +39,15 @@ class LRS2Pretrain(Dataset):
             ixs = ixs[ixs < len(self.datalist)]
             index = np.random.choice(ixs)
 
-        #passing the visual features file and the target file paths to the prepare function to obtain the input tensors
-        visualFeaturesFile = self.datalist[index] + ".npy"
+        #passing the audio file and the target file paths to the prepare function to obtain the input tensors
+        audioFile = self.datalist[index] + ".wav"
         targetFile = self.datalist[index] + ".txt"
-        inp, trgt, inpLen, trgtLen = prepare_pretrain_input(visualFeaturesFile, targetFile, self.numWords, self.charToIx, self.videoParams)
+        if np.random.choice([True, False], p=[self.noiseProb, 1-self.noiseProb]):
+            noise = self.noise
+        else:
+            noise = None
+        inp, trgt, inpLen, trgtLen = prepare_pretrain_input(audioFile, targetFile, noise, self.numWords, self.charToIx, self.noiseSNR,
+                                                            self.audioParams)
         return inp, trgt, inpLen, trgtLen
 
 
@@ -60,13 +61,14 @@ class LRS2Pretrain(Dataset):
 
 
 
+
 class LRS3Main(Dataset):
 
     """
     A custom dataset class for the LRS3 main (includes train, val, test) dataset
     """
 
-    def __init__(self, dataset, datadir, reqInpLen, charToIx, stepSize, videoParams):
+    def __init__(self, dataset, datadir, reqInpLen, charToIx, stepSize, audioParams, noiseParams):
         super(LRS3Main, self).__init__()
         with open(datadir + "/" + dataset + ".txt", "r") as f:
             lines = f.readlines()
@@ -75,7 +77,10 @@ class LRS3Main(Dataset):
         self.charToIx = charToIx
         self.dataset = dataset
         self.stepSize = stepSize
-        self.videoParams = videoParams
+        self.audioParams = audioParams
+        _, self.noise = wavfile.read(noiseParams["noiseFile"])
+        self.noiseSNR = noiseParams["noiseSNR"]
+        self.noiseProb = noiseParams["noiseProb"]
         return
 
 
@@ -87,10 +92,15 @@ class LRS3Main(Dataset):
             ixs = ixs[ixs < len(self.datalist)]
             index = np.random.choice(ixs)
 
-        #passing the visual features file and the target file paths to the prepare function to obtain the input tensors
-        visualFeaturesFile = self.datalist[index] + ".npy"
+        #passing the audio file and the target file paths to the prepare function to obtain the input tensors
+        audioFile = self.datalist[index] + ".wav"
         targetFile = self.datalist[index] + ".txt"
-        inp, trgt, inpLen, trgtLen = prepare_main_input(visualFeaturesFile, targetFile, self.reqInpLen, self.charToIx, self.videoParams)
+        if np.random.choice([True, False], p=[self.noiseProb, 1-self.noiseProb]):
+            noise = self.noise
+        else:
+            noise = None
+        inp, trgt, inpLen, trgtLen = prepare_main_input(audioFile, targetFile, noise, self.reqInpLen, self.charToIx, self.noiseSNR,
+                                                        self.audioParams)
         return inp, trgt, inpLen, trgtLen
 
 
